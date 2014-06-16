@@ -55,3 +55,23 @@ CROSS APPLY ( SELECT B.Value , B.RN FROM OrderedList B WHERE A.Id = B.Id AND A.R
 	  FROM Results
   ORDER BY Id
 		 , Value
+
+
+
+
+--==========================================================================================
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*\
+| Another way to run the cursor's update over an index "INDEX(1)"
+\*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+DECLARE @prevaccount AS INT,
+        @prevbalance AS MONEY;
+
+UPDATE X
+SET    @prevbalance = balance = CASE
+                                  WHEN actid = @prevaccount THEN @prevbalance + val
+                                  ELSE val
+                                END,
+       @prevaccount = actid
+FROM   #Transactions X WITH(INDEX(1), TABLOCKX)
+OPTION (MAXDOP 1); 
+
